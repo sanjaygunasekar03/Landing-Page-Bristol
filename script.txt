@@ -1,0 +1,292 @@
+// DOM Elements
+const mobileMenu = document.getElementById('mobile-menu');
+const navbar = document.getElementById('navbar');
+const navLinks = document.querySelectorAll('.navbar ul li a');
+const serviceCards = document.querySelectorAll('.service-card');
+const testimonialTrack = document.getElementById('testimonialTrack');
+const currentYear = document.getElementById('currentYear');
+
+const servicesData = {
+  'medical-billing': {
+    title: 'Medical Billing',
+    description: 'Our Medical Billing Services manage the complete billing lifecycle—from charge capture to final reimbursement—so your practice can focus on patient care while we focus on revenue performance.<br><br>By combining certified billing professionals, payer-specific workflows, and intelligent automation, we ensure faster payments, fewer errors, and consistent cash flow—all at a transparent cost starting at just 2% of monthly collections.',
+    points: [
+      'End-to-end billing management, from claim creation to payment resolution',
+      'Clean claim submission aligned with payer-specific rules',
+      'Real-time claim tracking and follow-up',
+      'Rapid resolution of rejections, edits, and underpayments',
+      'Transparent reporting and performance metrics'
+    ]
+  },
+  'medical-coding': {
+    title: 'Medical Coding & Audits',
+    description: 'Our Medical Coding & Audit services ensure your clinical documentation is accurately translated into compliant, revenue-optimized codes across all specialties.<br><br>With certified coders and proactive audits, we help practices reduce denials, avoid payer scrutiny, and uncover missed revenue opportunities—without disrupting provider workflows.',
+    points: [
+      'AAPC® and AHIMA® certified coding professionals',
+      'Specialty-specific CPT, ICD-10-CM, and HCPCS expertise',
+      'Coding audits and chart reviews for accuracy and compliance',
+      'Identification of undercoding and overcoding risks',
+      'Alignment with payer and regulatory guidelines'
+    ]
+  },
+  'ar-management': {
+    title: 'Accounts Receivable (AR) Management',
+    description: 'Our AR Management services focus on reducing outstanding balances and shortening payment cycles through disciplined follow-ups and data-driven prioritization.<br><br>We actively pursue unpaid and underpaid claims while providing complete visibility into AR performance and recovery trends.',
+    points: [
+      'Timely follow-up on unpaid and underpaid claims',
+      'Prioritization of high-value and aging accounts',
+      'Direct payer communication and issue resolution',
+      'Reduction in days in AR and aging backlogs',
+      'Detailed AR analytics and recovery reporting'
+    ]
+  },
+  'eligibility': {
+    title: 'Insurance Eligibility & Verification',
+    description: 'Our Insurance Eligibility & Verification services eliminate preventable denials by validating patient coverage and benefits before services are rendered.<br><br>By confirming coverage details upfront, we help practices improve clean claim rates, reduce rework, and set accurate financial expectations with patients.',
+    points: [
+      'Real-time insurance eligibility and benefits verification',
+      'Identification of copays, deductibles, and coinsurance',
+      'Prior authorization and referral verification',
+      'Payer-specific coverage validation',
+      'Improved front-end accuracy and patient financial clarity'
+    ]
+  },
+  'denial-management': {
+    title: 'Denial Management & Appeals',
+    description: 'Our Denial Management & Appeals services focus on resolving current denials while preventing future ones through root-cause analysis and process improvement.<br><br>We prepare and submit timely, well-supported appeals that comply with payer guidelines and documentation requirements.',
+    points: [
+      'Comprehensive denial analysis and categorization',
+      'Timely appeal submission with supporting documentation',
+      'Root-cause identification and corrective action plans',
+      'Reduction in recurring denial patterns',
+      'Continuous denial trend reporting and insights'
+    ]
+  },
+  'charge-entry': {
+    title: 'Charge Entry & Payment Posting',
+    description: 'Accurate charge entry and payment posting are essential to preventing revenue leakage and maintaining financial transparency. Our specialists ensure every service is captured, posted, and reconciled correctly.<br><br>Any discrepancies are flagged immediately, enabling faster follow-up and resolution.',
+    points: [
+      'Accurate charge capture and validation',
+      'Timely payment posting and adjustment reconciliation',
+      'Identification of underpayments and posting discrepancies',
+      'Support for secondary billing and patient balances',
+      'Improved financial visibility and reporting accuracy'
+    ]
+  }
+};
+
+// Mobile Menu Toggle
+mobileMenu.addEventListener('click', () => {
+  navbar.classList.toggle('active');
+  mobileMenu.classList.toggle('active');
+});
+
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    navbar.classList.remove('active');
+    mobileMenu.classList.remove('active');
+  });
+});
+
+// Set current year in footer
+if (currentYear) currentYear.textContent = new Date().getFullYear();
+
+// Initialize Bootstrap Modal
+let bootstrapModal = null;
+document.addEventListener('DOMContentLoaded', () => {
+  const modalEl = document.getElementById('serviceModal');
+  if (modalEl) {
+    bootstrapModal = new bootstrap.Modal(modalEl);
+  }
+});
+
+// Service Card Click → Open Modal
+serviceCards.forEach(card => {
+  card.addEventListener('click', function(e) {
+    if (e.target.closest('a')) {
+      e.preventDefault();
+      const key = this.getAttribute('data-service');
+      const s = servicesData[key];
+      if (s && bootstrapModal) {
+        document.getElementById('modalTitle').innerText = s.title;
+        document.getElementById('modalDescription').innerHTML = s.description;
+        const ul = document.getElementById('modalPointers');
+        ul.innerHTML = '';
+        s.points.forEach(p => {
+          const li = document.createElement('li');
+          li.innerHTML = p;
+          ul.appendChild(li);
+        });
+        bootstrapModal.show();
+        document.getElementById('mainContent').classList.add('blur-effect');
+      }
+    }
+  });
+});
+
+// Remove blur when any modal closes
+function removeBlur() {
+  document.getElementById('mainContent')?.classList.remove('blur-effect');
+}
+
+document.querySelectorAll('.btn-close').forEach(btn => {
+  btn.addEventListener('click', removeBlur);
+});
+
+['serviceModal', 'mobileQuoteModal'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('hidden.bs.modal', removeBlur);
+  }
+});
+
+// Desktop Multi-Step Form
+function validateStep1() {
+  let valid = true;
+  const name = document.getElementById("contactName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+
+  document.querySelectorAll(".error-text").forEach(e => e.style.display = "none");
+
+  if (name === "") {
+    document.getElementById("nameError").style.display = "block";
+    valid = false;
+  }
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    document.getElementById("emailError").style.display = "block";
+    valid = false;
+  }
+  if (!/^\d{10}$/.test(phone)) {
+    document.getElementById("phoneError").style.display = "block";
+    valid = false;
+  }
+
+  if (valid) nextStep();
+}
+
+function nextStep() {
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+  document.getElementById('dot1').classList.remove('active');
+  document.getElementById('dot2').classList.add('active');
+}
+
+function prevStep() {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('dot2').classList.remove('active');
+  document.getElementById('dot1').classList.add('active');
+}
+
+const desktopForm = document.getElementById("multiStepForm");
+if (desktopForm) {
+  desktopForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    alert("✅ Thank you for requesting your instant quote!\nOur billing experts will review your details and get back to you shortly with a customized pricing plan tailored to your practice.");
+    this.reset();
+    prevStep();
+  });
+}
+
+// Mobile Multi-Step Form
+function validateMobileStep1() {
+  let valid = true;
+  const name = document.getElementById("m-contactName").value.trim();
+  const email = document.getElementById("m-email").value.trim();
+  const phone = document.getElementById("m-phone").value.trim();
+
+  document.querySelectorAll("#mobileQuoteModal .error-text").forEach(e => e.style.display = "none");
+
+  if (name === "") {
+    document.getElementById("m-nameError").style.display = "block";
+    valid = false;
+  }
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    document.getElementById("m-emailError").style.display = "block";
+    valid = false;
+  }
+  if (!/^\d{10}$/.test(phone)) {
+    document.getElementById("m-phoneError").style.display = "block";
+    valid = false;
+  }
+
+  if (valid) mobileNextStep();
+}
+
+function mobileNextStep() {
+  document.getElementById('m-step1').classList.remove('active');
+  document.getElementById('m-step2').classList.add('active');
+  document.getElementById('m-dot1').classList.remove('active');
+  document.getElementById('m-dot2').classList.add('active');
+}
+
+function mobilePrevStep() {
+  document.getElementById('m-step2').classList.remove('active');
+  document.getElementById('m-step1').classList.add('active');
+  document.getElementById('m-dot2').classList.remove('active');
+  document.getElementById('m-dot1').classList.add('active');
+}
+
+const mobileForm = document.getElementById("mobileMultiStepForm");
+if (mobileForm) {
+  mobileForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    alert("✅ Thank you for requesting your instant quote!\nOur billing experts will review your details and get back to you shortly with a customized pricing plan tailored to your practice.");
+    this.reset();
+    mobilePrevStep();
+  });
+}
+
+// Testimonial Slider
+let currentTestimonial = 0;
+const totalTestimonials = 4;
+let autoSlideInterval;
+
+function moveTestimonial(direction) {
+  currentTestimonial = (currentTestimonial + direction + totalTestimonials) % totalTestimonials;
+  testimonialTrack.style.transform = `translateX(-${currentTestimonial * 100}%)`;
+  resetAutoSlide();
+}
+
+function resetAutoSlide() {
+  clearInterval(autoSlideInterval);
+  startAutoSlide();
+}
+
+function startAutoSlide() {
+  autoSlideInterval = setInterval(() => {
+    currentTestimonial = (currentTestimonial + 1) % totalTestimonials;
+    testimonialTrack.style.transform = `translateX(-${currentTestimonial * 100}%)`;
+  }, 5000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  startAutoSlide();
+});
+
+// Smooth Scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('href');
+    if (targetId === '#' || !targetId) return;
+    const targetElement = document.querySelector(targetId);
+    if (targetElement) {
+      window.scrollTo({
+        top: targetElement.offsetTop - 80,
+        behavior: 'smooth'
+      });
+    }
+  });
+});
+
+// Contact Form Submission
+const contactForm = document.querySelector('.contact-us form');
+if (contactForm) {
+  contactForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Thank you for your message! We will get back to you shortly.');
+    this.reset();
+  });
+}
